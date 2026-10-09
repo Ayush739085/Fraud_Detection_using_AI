@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeCart™ | Omnichannel AI Security Checkout</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0f1d;
+            --surface-card: rgba(17, 24, 39, 0.88);
+            --surface-sub: rgba(30, 41, 59, 0.6);
+            --border-line: rgba(255, 255, 255, 0.08);
+            --primary-blue: #3b82f6;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #172554 0%, var(--bg-dark) 85%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .store-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 45px;
+            background: rgba(10, 15, 26, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-line);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .store-logo {
+            font-size: 21px;
+            font-weight: 800;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .secure-vault-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            color: var(--emerald);
+            background: rgba(16, 185, 129, 0.12);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-weight: 700;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .main-container {
+            max-width: 1240px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 960px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-box {
+            background: var(--surface-card);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-line);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .catalog-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .product-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .product-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface-sub);
+            border: 1px solid var(--border-line);
+            border-radius: 14px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .product-card:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(30, 41, 59, 0.85);
+        }
+
+        .product-card.active {
+            border-color: var(--primary-blue);
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .prod-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .prod-icon {
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prod-details h4 {
+            margin: 0 0 3px 0;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .prod-details p {
+            margin: 0;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .prod-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .custom-item-box {
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            display: none;
+        }
+
+        .custom-item-box.show {
+            display: block;
+        }
+
+        .order-summary {
+            background: rgba(10, 15, 26, 0.6);
+            border: 1px solid var(--border-line);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #cbd5e1;
+            padding: 5px 0;
+        }
+
+        .summary-row.total {
+            font-size: 15px;
+            font-weight: 800;
+            color: #38bdf8;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 6px;
+            padding-top: 8px;
+        }
+
+        .safety-header {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .safety-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .safety-card {
+            background: rgba(10, 15, 26, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .safety-card h6 {
+            margin: 0 0 4px 0;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .safety-card p {
+            margin: 0;
+            font-size: 10px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .payment-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border-line);
+            color: #94a3b8;
+            padding: 10px 4px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--primary-blue);
+            color: #60a5fa;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        label {
+            font-size: 10.5px;
+            color: #94a3b8;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: rgba(10, 15, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .scenario-box {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+        }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .preset-pill {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 7px 4px;
+            border-radius: 8px;
+            font-size: 10.5px;
+            cursor: pointer;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .preset-pill:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .preset-pill.active {
+            background: rgba(59, 130, 246, 0.35);
+            border-color: var(--primary-blue);
+            color: #60a5fa;
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            margin-top: 4px;
+            transition: all 0.2s;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .upi-qr-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px dashed rgba(59, 130, 246, 0.4);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .qr-placeholder {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 10px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .risk-assessment-card {
+            margin-top: 18px;
+            background: rgba(10, 15, 26, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 16px;
+            display: none;
+        }
+
+        .risk-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .risk-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+
+        .badge-safe {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid #10b981;
+        }
+
+        .badge-challenge {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid #ef4444;
+        }
+
+        .progress-track {
+            height: 10px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .factor-item {
+            background: rgba(255, 255, 255, 0.04);
+            border-left: 3px solid #3b82f6;
+            padding: 6px 10px;
+            margin-top: 6px;
+            border-radius: 4px 8px 8px 4px;
+            color: #cbd5e1;
+            font-size: 11.5px;
+        }
+
+        .receipt-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 12px;
+            font-size: 12px;
+            display: none;
+            transition: background 0.2s;
+        }
+
+        .receipt-btn:hover {
+            background: rgba(16, 185, 129, 0.25);
+        }
+
+        .modal-wrap {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-body {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 24px;
+            border-radius: 20px;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .receipt-container {
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 420px;
+            width: 90%;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: left;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="store-nav">
+        <div class="store-logo">🛍️ LuxeCart™ Flagship</div>
+        <div class="secure-vault-badge">
+            <span class="pulse-dot"></span> 256-Bit SSL Encrypted Vault
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div>
+            <div class="catalog-title">
+                <span>Select Product or Add Custom</span>
+                <span style="color: #34d399;">● In Stock</span>
+            </div>
+
+            <div class="product-grid">
+                <div class="product-card active"
+                    onclick="selectItem('Apple MacBook Air (M2 13.6-inch)', 2500, '💻', this)">
+                    <div class="prod-info">
+                        <div class="prod-icon">💻</div>
+                        <div class="prod-details">
+                            <h4>Apple MacBook Air (M2 13.6")</h4>
+                            <p>Space Grey • 8GB Unified • 256GB SSD</p>
+                        </div>
+                    </div>
+                    <div class="prod-price">₹2,500</div>
+                </div>
+
+                <div class="product-card" onclick="selectItem('Sony WH-1000XM5 Headphones', 12500, '🎧', this)">
+                    <div class="prod-info">
+                        <div class="prod-icon">🎧</div>
+                        <div class="prod-details">
+                            <h4>Sony WH-1000XM5 Headphones</h4>
+                            <p>Industry-Leading ANC • Hi-Res Audio</p>
+                        </div>
+                    </div>
+                    <div class="prod-price">₹12,500</div>
+                </div>
+
+                <div class="product-card"
+                    onclick="selectItem('Apple iPhone 16 Pro (Titanium 256GB)', 45000, '📱', this)">
+                    <div class="prod-info">
+                        <div class="prod-icon">📱</div>
+                        <div class="prod-details">
+                            <h4>Apple iPhone 16 Pro (256GB)</h4>
+                            <p>Desert Titanium • A18 Pro Chip • 48MP</p>
+                        </div>
+                    </div>
+                    <div class="prod-price">₹45,000</div>
+                </div>
+
+                <div class="product-card"
+                    onclick="selectItem('Pure 24K Gold Minted Collector Bar', 145000, '🪙', this)">
+                    <div class="prod-info">
+                        <div class="prod-icon">🪙</div>
+                        <div class="prod-details">
+                            <h4>Pure 24K Gold Collector Bar</h4>
+                            <p>Swiss Assayer Certified • Tamperproof Enclave</p>
+                        </div>
+                    </div>
+                    <div class="prod-price">₹145,000</div>
+                </div>
+
+                <div class="product-card" onclick="enableCustomItem(this)" id="customCard">
+                    <div class="prod-info">
+                        <div class="prod-icon" style="background: rgba(59,130,246,0.2); color:#60a5fa;">➕</div>
+                        <div class="prod-details">
+                            <h4>Custom Product / Manual Amount</h4>
+                            <p>Enter your own item description and custom amount</p>
+                        </div>
+                    </div>
+                    <div class="prod-price" style="font-size:12px; color:#94a3b8;">Custom ₹</div>
+                </div>
+            </div>
+
+            <div class="custom-item-box" id="customInputBox">
+                <div class="form-row">
+                    <div>
+                        <label>Item Name</label>
+                        <input type="text" id="custom_name" placeholder="e.g. Gaming Drone" oninput="updateCustom()">
+                    </div>
+                    <div>
+                        <label>Custom Amount (₹)</label>
+                        <input type="number" id="custom_price" placeholder="e.g. 5000" min="10"
+                            oninput="updateCustom()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Selected Item</span>
+                    <span id="sumItemName" style="color: #f8fafc; font-weight: 600;">Apple MacBook Air (M2)</span>
+                </div>
+                <div class="summary-row">
+                    <span>Express Courier Shipping</span>
+                    <span style="color: #34d399; font-weight: 600;">FREE (Within 24 Hours)</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total Payable</span>
+                    <span id="sumTotalAmount">₹2,500</span>
+                </div>
+            </div>
+
+            <div class="safety-header">🛡️ Important Fraud Protection Guidelines</div>
+            <div class="safety-cards">
+                <div class="safety-card">
+                    <h6 style="color: #60a5fa;">🔑 Zero-Trust OTP Rule</h6>
+                    <p>Banks never ask for OTPs or PINs over call, SMS, or WhatsApp.</p>
+                </div>
+                <div class="safety-card">
+                    <h6 style="color: #f59e0b;">📶 Cellular Security</h6>
+                    <p>Never complete financial payments on open public Wi-Fi networks.</p>
+                </div>
+                <div class="safety-card">
+                    <h6 style="color: #34d399;">🌐 Host Verification</h6>
+                    <p>Verify encryption padlock and domain host before paying.</p>
+                </div>
+                <div class="safety-card">
+                    <h6 style="color: #f87171;">⚡ Instant Velocity Lock</h6>
+                    <p>Freeze your card or UPI handle immediately if unauthorized charges appear.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-box">
+            <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800;">Payment Authorization</h3>
+            <p style="margin: 0 0 16px 0; font-size: 12px; color: #94a3b8;">Select your preferred payment channel to
+                complete authorization.</p>
+
+            <div class="payment-tabs">
+                <button type="button" class="tab-btn active" id="tabCard" onclick="switchMethod('card')">💳
+                    Card</button>
+                <button type="button" class="tab-btn" id="tabUPI" onclick="switchMethod('upi')">📱 UPI / QR</button>
+                <button type="button" class="tab-btn" id="tabNet" onclick="switchMethod('net')">🏦 Net Banking</button>
+            </div>
+
+            <form id="checkoutForm">
+                <div id="methodCard">
+                    <div style="margin-bottom: 12px;">
+                        <label>Cardholder Name</label>
+                        <input type="text" id="cust_name" placeholder="Enter Cardholder Name">
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label>Card Number</label>
+                        <input type="text" id="cust_card" value="4532 8912 6734 9924" maxlength="19">
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Expiration Date</label>
+                            <input type="text" id="cust_expiry" value="12/28" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div>
+                            <label>Security Code (CVV)</label>
+                            <input type="password" id="cust_cvv" value="739" maxlength="4">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="methodUPI" style="display: none;">
+                    <div style="margin-bottom: 12px;">
+                        <label>Virtual Payment Address (UPI ID)</label>
+                        <input type="text" id="cust_upi" placeholder="username@okhdfcbank" oninput="updateQR()">
+                    </div>
+
+                    <div class="upi-qr-card">
+                        <div class="qr-placeholder">
+                            <img id="qrImage"
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=upi://pay?pa=pay@luxecart&pn=LuxeCart&am=2500"
+                                alt="Dynamic UPI QR" style="width:100%; height:100%;">
+                        </div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #38bdf8;" id="qrLabelAmount">Scan & Pay
+                            ₹2,500</div>
+                        <div style="font-size: 10px; color: #94a3b8; margin-top: 3px;">Compatible with GPay, PhonePe,
+                            Paytm, BHIM</div>
+                    </div>
+                </div>
+
+                <div id="methodNet" style="display: none;">
+                    <div style="margin-bottom: 12px;">
+                        <label>Select Financial Institution</label>
+                        <select id="cust_bank">
+                            <option value="HDFC Bank">HDFC Bank Direct Gateway</option>
+                            <option value="State Bank of India">State Bank of India (SBI)</option>
+                            <option value="ICICI Bank">ICICI Corporate & Retail</option>
+                            <option value="Axis Bank">Axis Bank Enclave</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label>Delivery Address</label>
+                    <input type="text" id="cust_address" value="Sector 14, Indira Nagar, Lucknow, UP" required>
+                </div>
+
+                <input type="hidden" id="raw_amount" value="2500">
+                <input type="hidden" id="raw_hour" value="14">
+                <input type="hidden" id="raw_fails" value="0">
+                <input type="hidden" id="raw_velocity" value="1">
+                <input type="hidden" id="raw_geo" value="10">
+                <input type="hidden" id="raw_device" value="0">
+
+                <div class="scenario-box">
+                    <div class="scenario-header">
+                        <span>⚡ AI Attack Profile Simulation:</span>
+                        <span id="currentProfileName" style="color: #34d399;">Legit Customer (Safe)</span>
+                    </div>
+                    <div class="scenario-grid">
+                        <button type="button" class="preset-pill active" onclick="setDemoProfile('legit', this)">🟢
+                            Legit</button>
+                        <button type="button" class="preset-pill" onclick="setDemoProfile('bot', this)">⚡ Bot
+                            Script</button>
+                        <button type="button" class="preset-pill" onclick="setDemoProfile('geo', this)">✈️
+                            Geo-Jump</button>
+                        <button type="button" class="preset-pill" onclick="setDemoProfile('fraud', this)">🔴
+                            Zero-Day</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="pay-btn" id="payButton">⚡ Authorize & Pay ₹2,500</button>
+            </form>
+
+            <div class="risk-assessment-card" id="riskCard">
+                <div class="risk-card-head">
+                    <div>
+                        <h5 style="margin: 0; font-size: 13px; color: #f8fafc;">🛡️ Live AI Fraud Assessment</h5>
+                        <span style="font-size: 10px; color: #94a3b8;">Dual-Engine ML (RF + Isolation Forest)</span>
+                    </div>
+                    <span class="risk-badge badge-safe" id="riskBadge">SAFE VERDICT</span>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; margin-top: 8px;">
+                    <span>Evaluated Fraud Probability:</span>
+                    <strong id="riskScoreText"
+                        style="font-size: 16px; font-family: 'JetBrains Mono', monospace;">14%</strong>
+                </div>
+
+                <div class="progress-track">
+                    <div class="progress-fill" id="riskProgressFill"></div>
+                </div>
+
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">Security Telemetry Breakdown:</div>
+                <div class="risk-factors-list" id="riskFactorsContainer"></div>
+
+                <button type="button" class="receipt-btn" id="receiptBtn" onclick="openReceiptModal()">🧾 Download
+                    Official Order Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrap" id="otpModal">
+        <div class="modal-body" style="border-color: rgba(245, 158, 11, 0.5);">
+            <h4 style="margin: 0; color: #fbbf24;">⚠️ Adaptive 2FA Security Challenge</h4>
+            <p style="font-size: 12px; color: #94a3b8; margin: 8px 0 16px 0;">Anomaly profile detected. Enter the
+                6-digit OTP sent to your registered phone to confirm.</p>
+            <input type="text"
+                style="text-align: center; font-family: 'JetBrains Mono', monospace; letter-spacing: 8px; font-size: 22px; font-weight: 700; margin-bottom: 14px;"
+                value="894210" maxlength="6">
+            <button type="button" onclick="verifyOTP()"
+                style="width: 100%; padding: 10px; background: #fbbf24; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">Confirm
+                Clearance</button>
+        </div>
+    </div>
+
+    <div class="modal-wrap" id="receiptModal">
+        <div class="receipt-container">
+            <div style="border-bottom: 2px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 18px; color: #0f172a;">LuxeCart™ Retail Gateway</h3>
+                <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">Official Tax Invoice & Payment Receipt
+                </p>
+            </div>
+            <div style="font-size: 11.5px; line-height: 1.6; color: #334155;">
+                <div><strong>ORDER ID:</strong> <span id="recOrderId">#ORD-98241</span></div>
+                <div><strong>TIMESTAMP:</strong> <span id="recTime">Just now</span></div>
+                <div><strong>CUSTOMER:</strong> <span id="recCustomer">Customer</span></div>
+                <div><strong>ITEM:</strong> <span id="recItem">Apple MacBook Air (M2)</span></div>
+                <div><strong>AMOUNT PAID:</strong> <strong id="recAmount" style="color: #0f172a;">₹2,500</strong></div>
+                <div><strong>METHOD:</strong> <span id="recMethod">Card Clearance</span></div>
+            </div>
+            <div
+                style="margin-top: 14px; padding: 10px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; text-align: center; color: #047857; font-size: 11px; font-weight: 700;">
+                ✓ VERIFIED CLEAN BY DUAL-ENGINE AI SHIELD
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button onclick="window.print()"
+                    style="flex: 1; padding: 8px; background: #0f172a; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">🖨️
+                    Print Receipt</button>
+                <button onclick="closeReceiptModal()"
+                    style="padding: 8px 14px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CUSTOMER_POOL = ["Rahul Sharma", "Priya Verma", "Aditya Roy", "Sneha Gupta", "Vikram Malhotra", "Ananya Iyer", "Karan Mehra", "Pooja Patel"];
+        let activeMethod = 'card';
+        let keyTimes = [];
+        let avgTypingSpeed = 140;
+        let isProcessing = false;
+        let lastEvaluatedName = "";
+
+        function getRandomCustomer() {
+            return CUSTOMER_POOL[Math.floor(Math.random() * CUSTOMER_POOL.length)];
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialName = getRandomCustomer();
+            document.getElementById('cust_name').value = initialName;
+            document.getElementById('cust_upi').value = initialName.toLowerCase().replace(/\s+/g, '.') + "@okhdfcbank";
+            updateQR();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                keyTimes.push(performance.now());
+                if (keyTimes.length > 3) {
+                    const diffs = [];
+                    for (let i = 1; i < keyTimes.length; i++) diffs.push(keyTimes[i] - keyTimes[i - 1]);
+                    avgTypingSpeed = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+                }
+            }
+        });
+
+        function switchMethod(method) {
+            activeMethod = method;
+            document.getElementById('methodCard').style.display = method === 'card' ? 'block' : 'none';
+            document.getElementById('methodUPI').style.display = method === 'upi' ? 'block' : 'none';
+            document.getElementById('methodNet').style.display = method === 'net' ? 'block' : 'none';
+
+            document.getElementById('tabCard').classList.toggle('active', method === 'card');
+            document.getElementById('tabUPI').classList.toggle('active', method === 'upi');
+            document.getElementById('tabNet').classList.toggle('active', method === 'net');
+
+            if (method === 'upi') updateQR();
+        }
+
+        function updateQR() {
+            const amt = document.getElementById('raw_amount').value || 2500;
+            const vpa = document.getElementById('cust_upi').value || 'secure.user@okhdfcbank';
+            const label = document.getElementById('qrLabelAmount');
+            const img = document.getElementById('qrImage');
+            if (label) label.innerText = `Scan & Pay ₹${Number(amt).toLocaleString()}`;
+            if (img) img.src = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=upi://pay?pa=${encodeURIComponent(vpa)}&pn=LuxeCart&am=${amt}`;
+        }
+
+        function resetEvaluationState() {
+            const card = document.getElementById('riskCard');
+            if (card) card.style.display = 'none';
+            const btn = document.getElementById('payButton');
+            if (btn) {
+                btn.disabled = false;
+                const amt = document.getElementById('raw_amount').value || 2500;
+                btn.innerText = `⚡ Authorize & Pay ₹${Number(amt).toLocaleString()}`;
+            }
+            isProcessing = false;
+        }
+
+        function selectItem(name, price, icon, el) {
+            document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('customInputBox').classList.remove('show');
+
+            document.getElementById('sumItemName').innerText = name;
+            const formatted = '₹' + Number(price).toLocaleString();
+            document.getElementById('sumTotalAmount').innerText = formatted;
+
+            document.getElementById('raw_amount').value = price;
+            resetEvaluationState();
+            updateQR();
+        }
+
+        function enableCustomItem(el) {
+            document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            const box = document.getElementById('customInputBox');
+            box.classList.add('show');
+
+            if (!document.getElementById('custom_name').value) {
+                document.getElementById('custom_name').value = "Custom Order Item";
+            }
+            if (!document.getElementById('custom_price').value) {
+                document.getElementById('custom_price').value = "5000";
+            }
+            updateCustom();
+        }
+
+        function updateCustom() {
+            const name = document.getElementById('custom_name').value || "Custom Order Item";
+            const price = parseFloat(document.getElementById('custom_price').value) || 0;
+
+            document.getElementById('sumItemName').innerText = name;
+            const formatted = '₹' + Number(price).toLocaleString();
+            document.getElementById('sumTotalAmount').innerText = formatted;
+
+            document.getElementById('raw_amount').value = price;
+            resetEvaluationState();
+            updateQR();
+        }
+
+        function setDemoProfile(type, btn) {
+            document.querySelectorAll('.preset-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            resetEvaluationState();
+
+            const profileLabel = document.getElementById('currentProfileName');
+
+            if (type === 'legit') {
+                const legName = getRandomCustomer();
+                if (profileLabel) { profileLabel.innerText = "Legit Customer (Safe)"; profileLabel.style.color = "#34d399"; }
+                document.getElementById('cust_name').value = legName;
+                document.getElementById('cust_card').value = "4532 8912 6734 9924";
+                document.getElementById('cust_upi').value = legName.toLowerCase().replace(/\s+/g, '.') + "@okhdfcbank";
+                document.getElementById('raw_hour').value = 14;
+                document.getElementById('raw_fails').value = 0;
+                document.getElementById('raw_velocity').value = 1;
+                document.getElementById('raw_geo').value = 10;
+                document.getElementById('raw_device').value = 0;
+                avgTypingSpeed = 145;
+            } else if (type === 'bot') {
+                const botTag = `BOT-NODE-${Math.floor(100 + Math.random() * 900)}`;
+                if (profileLabel) { profileLabel.innerText = "Bot Script Injection"; profileLabel.style.color = "#f59e0b"; }
+                document.getElementById('cust_name').value = botTag;
+                document.getElementById('cust_card').value = "5105 1051 0510 1102";
+                document.getElementById('cust_upi').value = "burst.bot@fakeupi";
+                document.getElementById('raw_hour').value = 2;
+                document.getElementById('raw_fails').value = 3;
+                document.getElementById('raw_velocity').value = 9;
+                document.getElementById('raw_geo').value = 20;
+                document.getElementById('raw_device').value = 1;
+                avgTypingSpeed = 8;
+            } else if (type === 'geo') {
+                const geoTag = `GEO-SPOOF-${Math.floor(100 + Math.random() * 900)}`;
+                if (profileLabel) { profileLabel.innerText = "Impossible Geo-Velocity Jump"; profileLabel.style.color = "#f59e0b"; }
+                document.getElementById('cust_name').value = geoTag;
+                document.getElementById('cust_card').value = "4111 1111 1111 4500";
+                document.getElementById('cust_upi').value = "geo.jump@foreignpay";
+                document.getElementById('raw_hour').value = 18;
+                document.getElementById('raw_fails').value = 1;
+                document.getElementById('raw_velocity').value = 2;
+                document.getElementById('raw_geo').value = 4500;
+                document.getElementById('raw_device').value = 1;
+                avgTypingSpeed = 120;
+            } else if (type === 'fraud') {
+                const zeroTag = `ZERO-DAY-${Math.floor(100 + Math.random() * 900)}`;
+                if (profileLabel) { profileLabel.innerText = "Zero-Day Attack (Critical)"; profileLabel.style.color = "#f87171"; }
+                document.getElementById('cust_name').value = zeroTag;
+                document.getElementById('cust_card').value = "3782 8224 6310 0054";
+                document.getElementById('cust_upi').value = "zero.day@exploitnode";
+                document.getElementById('raw_hour').value = 3;
+                document.getElementById('raw_fails').value = 5;
+                document.getElementById('raw_velocity').value = 7;
+                document.getElementById('raw_geo').value = 3200;
+                document.getElementById('raw_device').value = 1;
+                avgTypingSpeed = 15;
+            }
+            updateQR();
+        }
+
+        document.getElementById('checkoutForm').onsubmit = async function (e) {
+            e.preventDefault();
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const btn = document.getElementById('payButton');
+            const currentAmount = parseFloat(document.getElementById('raw_amount').value) || 2500;
+
+            btn.innerText = "Analyzing Risk Vectors...";
+            btn.disabled = true;
+
+            const card = document.getElementById('riskCard');
+            card.style.display = 'block';
+            document.getElementById('riskBadge').className = "risk-badge";
+            document.getElementById('riskBadge').innerText = "CALCULATING...";
+            document.getElementById('riskProgressFill').style.width = "25%";
+            document.getElementById('riskScoreText').innerText = "--";
+
+            let userIdentifier = document.getElementById('cust_name').value.trim();
+            if (!userIdentifier) userIdentifier = getRandomCustomer();
+
+            if (activeMethod === 'upi') {
+                userIdentifier = document.getElementById('cust_upi').value || userIdentifier;
+            } else if (activeMethod === 'net') {
+                userIdentifier = `${userIdentifier} (${document.getElementById('cust_bank').value})`;
+            }
+
+            lastEvaluatedName = userIdentifier;
+
+            const payload = {
+                user_id: userIdentifier,
+                amount: currentAmount,
+                hour_of_day: parseInt(document.getElementById('raw_hour').value) || 14,
+                failed_attempts: parseInt(document.getElementById('raw_fails').value) || 0,
+                txn_velocity: parseInt(document.getElementById('raw_velocity').value) || 1,
+                geo_distance_km: parseFloat(document.getElementById('raw_geo').value) || 10,
+                is_new_device: parseInt(document.getElementById('raw_device').value) || 0,
+                avg_typing_speed_ms: avgTypingSpeed || 140
+            };
+
+            try {
+                const res = await fetch('/api/analyze-transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                renderCustomerRiskCard(data);
+
+                if (data.status === 'Flagged') {
+                    setTimeout(() => { document.getElementById('otpModal').style.display = 'flex'; }, 500);
+                }
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                alert("⚠️ Connection error. Please try again.");
+            } finally {
+                btn.innerText = `⚡ Authorize & Pay ₹${Number(currentAmount).toLocaleString()}`;
+                btn.disabled = false;
+                isProcessing = false;
+            }
+        };
+
+        function renderCustomerRiskCard(data) {
+            const badge = document.getElementById('riskBadge');
+            const scoreText = document.getElementById('riskScoreText');
+            const fill = document.getElementById('riskProgressFill');
+            const factorsContainer = document.getElementById('riskFactorsContainer');
+            const receiptBtn = document.getElementById('receiptBtn');
+
+            let targetScore = Math.round(Number(data.risk_score));
+            if (isNaN(targetScore) || targetScore <= 0) {
+                targetScore = (data.status === 'Blocked') ? 92 : ((data.status === 'Flagged') ? 54 : 14);
+            }
+
+            let count = 0;
+            const step = Math.ceil(targetScore / 15) || 1;
+            const timer = setInterval(() => {
+                count += step;
+                if (count >= targetScore) {
+                    count = targetScore;
+                    clearInterval(timer);
+                }
+                scoreText.innerText = `${count}%`;
+                fill.style.width = `${count}%`;
+            }, 20);
+
+            if (data.quarantined || data.status === 'Blocked' || targetScore >= 70) {
+                badge.className = "risk-badge badge-danger";
+                badge.innerText = "⛔ BLOCKED: HIGH FRAUD RISK";
+                fill.style.background = "#ef4444";
+                scoreText.style.color = "#ef4444";
+                if (receiptBtn) receiptBtn.style.display = "none";
+            } else if (data.status === 'Flagged' || targetScore >= 40) {
+                badge.className = "risk-badge badge-challenge";
+                badge.innerText = "⚠️ 2FA CHALLENGE REQUIRED";
+                fill.style.background = "#f59e0b";
+                scoreText.style.color = "#f59e0b";
+                if (receiptBtn) receiptBtn.style.display = "none";
+            } else {
+                badge.className = "risk-badge badge-safe";
+                badge.innerText = "✓ APPROVED (CLEAN)";
+                fill.style.background = "#10b981";
+                scoreText.style.color = "#10b981";
+                if (receiptBtn) receiptBtn.style.display = "block";
+            }
+
+            const factors = data.risk_factors || [];
+            if (factors.length === 0 || (factors.length === 1 && factors[0].includes("Standard legitimate"))) {
+                factorsContainer.innerHTML = '<div class="factor-item" style="border-color:#10b981;">✓ Normal Cadence, Trusted Hardware, Verified Geolocation.</div>';
+            } else {
+                factorsContainer.innerHTML = factors.map(f => `<div class="factor-item">⚠️ ${f}</div>`).join('');
+            }
+        }
+
+        function verifyOTP() {
+            document.getElementById('otpModal').style.display = 'none';
+            alert("✓ 2FA Verified Successfully! Payment Cleared.");
+            const receiptBtn = document.getElementById('receiptBtn');
+            if (receiptBtn) receiptBtn.style.display = "block";
+        }
+
+        function openReceiptModal() {
+            document.getElementById('recOrderId').innerText = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('recTime').innerText = new Date().toLocaleTimeString();
+            document.getElementById('recCustomer').innerText = lastEvaluatedName || document.getElementById('cust_name').value || 'Customer';
+            document.getElementById('recItem').innerText = document.getElementById('sumItemName').innerText;
+            document.getElementById('recAmount').innerText = '₹' + Number(document.getElementById('raw_amount').value).toLocaleString();
+            document.getElementById('recMethod').innerText = activeMethod.toUpperCase() + ' Direct Clearing';
+            document.getElementById('receiptModal').style.display = 'flex';
+        }
+        function closeReceiptModal() { document.getElementById('receiptModal').style.display = 'none'; }
+    </script>
+</body>
+
+</html>

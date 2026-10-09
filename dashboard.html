@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise SOC Center | Full Threat Defense</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #080c15;
+            --surface: rgba(17, 24, 39, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --accent: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #172554 0%, var(--bg-color) 85%);
+            color: #f8fafc;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7);
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(10, 15, 26, 0.65);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 14px;
+        }
+
+        .stat-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .stat-card .value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .telemetry-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .box {
+            background: rgba(10, 15, 26, 0.65);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 16px;
+        }
+
+        .box h4 {
+            margin: 0 0 12px 0;
+            font-size: 12px;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #attackMap {
+            height: 200px;
+            width: 100%;
+            border-radius: 10px;
+            background: #0b1120;
+        }
+
+        .dual-panels {
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(10, 15, 26, 0.8);
+            color: #94a3b8;
+        }
+
+        .flash-row {
+            animation: highlightNew 2s ease-out;
+        }
+
+        @keyframes highlightNew {
+            0% {
+                background: rgba(59, 130, 246, 0.35);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        .badge-blocked {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .badge-flagged {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .badge-approved {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .factor-pill {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #93c5fd;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 10px;
+            margin: 2px 2px 0 0;
+        }
+
+        .sim-toggle-btn {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .sim-toggle-btn.active {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .revoke-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-flex">
+            <div>
+                <h2 style="margin:0; font-size:22px;">🛡️ Autonomous SOC Intelligence & Perimeter Firewall</h2>
+                <p style="margin:4px 0 0 0; font-size:12px; color:#94a3b8;">Biometric Behavioral Stream • Automated
+                    Quarantine Engine • Simulated Traffic</p>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <button id="simBtn" class="sim-toggle-btn" onclick="toggleSimulator()">▶ Start Live Stream
+                    Traffic</button>
+                <a href="/" target="_blank"
+                    style="background:#3b82f6; color:#fff; text-decoration:none; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:600;">Launch
+                    Checkout →</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>TOTAL TRANSACTIONS</h3>
+                <div class="value" id="valTotal">{{ stats.total_transactions }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>BLOCKED FRAUDS</h3>
+                <div class="value" id="valFraud" style="color:#f87171;">{{ stats.total_fraud }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>2FA CHALLENGED</h3>
+                <div class="value" id="valFlagged" style="color:#fbbf24;">{{ stats.total_flagged }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>SECURE REVENUE</h3>
+                <div class="value" id="valRev" style="color:#34d399;">₹{{ stats.total_revenue }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>MEAN RISK VECTOR</h3>
+                <div class="value" id="valRisk" style="color:#60a5fa;">{{ stats.avg_risk }}%</div>
+            </div>
+        </div>
+
+        <div class="telemetry-row">
+            <div class="box">
+                <h4>SECURITY VERDICT RATIO</h4>
+                <div style="height:190px;"><canvas id="ratioChart"></canvas></div>
+            </div>
+            <div class="box">
+                <h4>RISK EXPOSURE STREAM</h4>
+                <div style="height:190px;"><canvas id="exposureChart"></canvas></div>
+            </div>
+            <div class="box">
+                <h4>LIVE GEO-TRAJECTORY MAP</h4>
+                <div id="attackMap"></div>
+            </div>
+        </div>
+
+        <div class="dual-panels">
+            <!-- Main Telemetry Table -->
+            <div class="box" style="overflow-x:auto;">
+                <h4>REAL-TIME TELEMETRY FEED</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>USER</th>
+                            <th>AMOUNT</th>
+                            <th>RISK</th>
+                            <th>DECISION</th>
+                            <th>XAI REASONING</th>
+                            <th>TIME</th>
+                        </tr>
+                    </thead>
+                    <tbody id="telemetryRows">
+                        {% for tx in transactions %}
+                        <tr>
+                            <td><code>{{ tx.user_id }}</code></td>
+                            <td>₹{{ tx.amount }}</td>
+                            <td><strong
+                                    style="color: {{ '#f87171' if tx.risk_score >= 70 else ('#fbbf24' if tx.risk_score >= 40 else '#34d399') }};">{{
+                                    tx.risk_score }}%</strong></td>
+                            <td>
+                                {% if tx.status == 'Blocked' %}<span class="badge-blocked">⛔ Blocked</span>
+                                {% elif tx.status == 'Flagged' %}<span class="badge-flagged">⚠️ 2FA</span>
+                                {% else %}<span class="badge-approved">✓ Approved</span>{% endif %}
+                            </td>
+                            <td>{% for f in tx.risk_factors %}<span class="factor-pill">{{ f }}</span>{% endfor %}</td>
+                            <td style="color:#94a3b8;">{{ tx.formatted_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Firewall Quarantine Registry Panel -->
+            <div class="box">
+                <h4><span>🔥 QUARANTINE FIREWALL</span> <span style="font-size:10px; color:#f87171;">ACTIVE
+                        BLACKLIST</span></h4>
+                <table style="margin-top:5px;">
+                    <thead>
+                        <tr>
+                            <th>USER ID</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quarantineRows">
+                        {% for uid, details in quarantine.items() %}
+                        <tr>
+                            <td><code>{{ uid }}</code></td>
+                            <td><button class="revoke-btn" onclick="revokeUser('{{ uid }}')">Revoke</button></td>
+                        </tr>
+                        {% else %}
+                        <tr id="emptyQuarantine">
+                            <td colspan="2" style="color:#64748b; text-align:center;">No quarantined users</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; padding-top:15px; border-top:1px solid var(--border);">
+            <span style="font-size:12px; color:#64748b;">Autonomous Loop: Active | Latency: 12ms</span>
+            <button
+                style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171; padding:8px 16px; border-radius:10px; cursor:pointer;"
+                onclick="clearTelemetry()">🗑️ Reset Telemetry Database</button>
+        </div>
+    </div>
+
+    <script>
+        const chartPayload = JSON.parse('{{ chart_data | tojson | safe }}');
+
+        // 1. OpenStreetMap Layer (100% Free, No Watermark, No API Key Required)
+        const map = L.map('attackMap', { zoomControl: false, attributionControl: false }).setView([22.0, 40.0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18
+        }).addTo(map);
+
+        let activeLayer = null;
+        function plotTrajectory(origin, dest, isBlocked) {
+            if (activeLayer) map.removeLayer(activeLayer);
+            const color = isBlocked ? '#ef4444' : '#10b981';
+            activeLayer = L.layerGroup([
+                L.circleMarker([origin.lat, origin.lon], { color: '#3b82f6', radius: 5, fillOpacity: 0.8 }),
+                L.circleMarker([dest.lat, dest.lon], { color: color, radius: 6, fillOpacity: 0.8 }),
+                L.polyline([[origin.lat, origin.lon], [dest.lat, dest.lon]], { color: color, weight: 3, dashArray: isBlocked ? '6,6' : null })
+            ]).addTo(map);
+            map.fitBounds([[origin.lat, origin.lon], [dest.lat, dest.lon]], { padding: [25, 25] });
+        }
+
+        // 2. Charts
+        const ratioChart = new Chart(document.getElementById('ratioChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Approved', '2FA', 'Blocked'],
+                datasets: [{ data: [chartPayload.total_approved, chartPayload.total_flagged, chartPayload.total_blocked], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+        });
+
+        const exposureChart = new Chart(document.getElementById('exposureChart'), {
+            type: 'bar',
+            data: {
+                labels: chartPayload.labels,
+                datasets: [
+                    { label: 'Risk %', data: chartPayload.scores, backgroundColor: 'rgba(239, 68, 68, 0.8)', yAxisID: 'yRisk', borderRadius: 4 },
+                    { label: 'Amount (k)', data: chartPayload.amounts.map(a => a / 1000), backgroundColor: 'rgba(59, 130, 246, 0.8)', yAxisID: 'yAmt', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { color: '#94a3b8', font: { size: 9 } } },
+                    yRisk: { max: 100, position: 'left', ticks: { color: '#f87171' } },
+                    yAmt: { position: 'right', grid: { display: false }, ticks: { color: '#60a5fa' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3. Socket.IO Listeners
+        const socket = io();
+        socket.on('telemetry_stream_event', (payload) => {
+            const tx = payload.transaction;
+            const stats = payload.stats;
+
+            document.getElementById('valTotal').innerText = stats.total_transactions;
+            document.getElementById('valFraud').innerText = stats.total_fraud;
+            document.getElementById('valFlagged').innerText = stats.total_flagged;
+            document.getElementById('valRev').innerText = '₹' + stats.total_revenue;
+            document.getElementById('valRisk').innerText = stats.avg_risk + '%';
+
+            ratioChart.data.datasets[0].data = [Math.max(0, stats.total_transactions - (stats.total_fraud + stats.total_flagged)), stats.total_flagged, stats.total_fraud];
+            ratioChart.update();
+
+            if (exposureChart.data.labels.length >= 8) {
+                exposureChart.data.labels.shift();
+                exposureChart.data.datasets[0].data.shift();
+                exposureChart.data.datasets[1].data.shift();
+            }
+            exposureChart.data.labels.push(tx.user_id);
+            exposureChart.data.datasets[0].data.push(tx.risk_score);
+            exposureChart.data.datasets[1].data.push(tx.amount / 1000);
+            exposureChart.update();
+
+            if (tx.origin && tx.destination) plotTrajectory(tx.origin, tx.destination, tx.is_fraud);
+
+            const color = tx.risk_score >= 70 ? '#f87171' : (tx.risk_score >= 40 ? '#fbbf24' : '#34d399');
+            const badge = tx.status === 'Blocked' ? '<span class="badge-blocked">⛔ Blocked</span>' : (tx.status === 'Flagged' ? '<span class="badge-flagged">⚠️️ 2FA</span>' : '<span class="badge-approved">✓ Approved</span>');
+            const factors = (tx.risk_factors || []).map(f => `<span class="factor-pill">${f}</span>`).join('');
+
+            const newRow = `
+            <tr class="flash-row">
+                <td><code>${tx.user_id}</code></td>
+                <td>₹${tx.amount}</td>
+                <td><strong style="color: ${color};">${tx.risk_score}%</strong></td>
+                <td>${badge}</td>
+                <td>${factors}</td>
+                <td style="color:#94a3b8;">${tx.formatted_time}</td>
+            </tr>
+        `;
+            document.getElementById('telemetryRows').insertAdjacentHTML('afterbegin', newRow);
+
+            updateQuarantineDOM(payload.quarantine_list);
+        });
+
+        socket.on('quarantine_updated', (qList) => updateQuarantineDOM(qList));
+        socket.on('telemetry_reset_event', () => location.reload());
+
+        function updateQuarantineDOM(qList) {
+            const tbody = document.getElementById('quarantineRows');
+            if (!qList || Object.keys(qList).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="color:#64748b; text-align:center;">No quarantined users</td></tr>';
+                return;
+            }
+            tbody.innerHTML = Object.keys(qList).map(uid => `
+            <tr>
+                <td><code>${uid}</code></td>
+                <td><button class="revoke-btn" onclick="revokeUser('${uid}')">Revoke</button></td>
+            </tr>
+        `).join('');
+        }
+
+        async function revokeUser(uid) {
+            await fetch('/api/revoke-quarantine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid })
+            });
+        }
+
+        let isSimRunning = false;
+        async function toggleSimulator() {
+            isSimRunning = !isSimRunning;
+            const btn = document.getElementById('simBtn');
+            btn.innerText = isSimRunning ? "■ Stop Live Stream Traffic" : "▶ Start Live Stream Traffic";
+            btn.classList.toggle('active', isSimRunning);
+            await fetch('/api/toggle-simulator', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enable: isSimRunning })
+            });
+        }
+
+        async function clearTelemetry() {
+            if (confirm("Reset telemetry session?")) {
+                await fetch('/api/clear-telemetry', { method: 'POST' });
+            }
+        }
+    </script>
+</body>
+
+</html>
